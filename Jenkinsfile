@@ -54,7 +54,7 @@ environment {
         } // End of Test Stage
 
         // ===== 3. Deploy Stage (Staging) =====
-  stage('Deploy in Staging') {
+ stage('Deploy in Staging') {
     steps {
         echo "Starting Deploy Stage in Staging"
         // Create jenkins_env.sh file
@@ -73,7 +73,8 @@ environment {
         //Create the directory
         sh "mkdir -p ${STAGING_DIR}"
         echo "Running deploy script for Staging..."
-        sh './deploy.sh  Staging' # Pass only the environment name
+        // Pass only the environment name
+        sh './deploy.sh  Staging'
         sh "cp build/app.txt ${STAGING_DIR}/"
         echo "Deployed artifact to ${STAGING_DIR}"
         // Clean up the jenkins_env.sh file
@@ -84,6 +85,7 @@ environment {
         failure { echo 'Deployment failed in Staging!' }
     }
 }
+
 // End of Deploy Stage to Staging
 
            // ===== 4. Deploy Stage (Production) =====
