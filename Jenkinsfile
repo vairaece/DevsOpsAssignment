@@ -89,31 +89,39 @@ environment {
 // End of Deploy Stage to Staging
 
            // ===== 4. Deploy Stage (Production) =====
-        stage('Deploy in Production') {
-            // REMOVED the 'when' block - it's not needed here
-            steps {
-                echo "Starting Deploy Stage in Production"
-                 //sh "mkdir -p ${env.PROD_DIR}"
-                    script {
+      
+         stage('Deploy in Production') {
+    steps {
+        echo "Starting Deploy Stage in Production"
+        // Create jenkins_env.sh file
+        script {
             def envVars = [
                 "STAGING_DIR=${env.STAGING_DIR}",
                 "PROD_DIR=${env.PROD_DIR}"
             ]
-                 sh "echo '${envVars.join("\\n")}' > jenkins_env.sh"
-                    }
-                 // Add execute permission for the deploy script too!
-                 echo "Setting execute permission for deploy script for Production..."
-                 sh 'chmod +x deploy.sh'
-                 echo "Running deploy script for Production..."
-                sh './deploy.sh Production ${env.PROD_DIR}' 
-                sh "cp build/app.txt ${env.PROD_DIR}/" 
-                    echo "Deployed artifact to ${env.PROD_DIR}"
-            }
-            post {
-                success { echo 'Deployment successful in Production!' }
-                failure { echo 'Deployment failed in Production!' }
-            }
-        } // End of Deploy Stage to Production
+            sh "echo '${envVars.join("\\n")}' > jenkins_env.sh"
+        }
+        // Add execute permission for the deploy script too!
+        echo "Setting execute permission for deploy script for Production..."
+        sh 'chmod +x deploy.sh'
+        //Source the file
+        sh "source jenkins_env.sh"
+        //Create the directory
+        sh "mkdir -p ${PROD_DIR}"
+        echo "Running deploy script for Production..."
+        // Pass only the environment name
+        sh './deploy.sh  Production'
+        sh "cp build/app.txt ${PROD_DIR}/"
+        echo "Deployed artifact to ${PROD_DIR}"
+        // Clean up the jenkins_env.sh file
+        sh 'rm -f jenkins_env.sh'
+    }
+    post {
+        success { echo 'Deployment successful in Production!' }
+        failure { echo 'Deployment failed in Production!' }
+    }
+}
+        // End of Deploy Stage to Production
 
     } // End of stages
 
