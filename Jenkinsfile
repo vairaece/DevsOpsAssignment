@@ -77,11 +77,11 @@ pipeline {
         }
         success {
             echo 'Pipeline completed successfully!'
-            // mail to: 'team@example.com', subject: "SUCCESS: Pipeline ${env.JOB_NAME} [${env.BUILD_NUMBER}]"
+            // mail to: '2023tm93621@wilp.bits-pilani.ac.in', subject: "SUCCESS: Pipeline ${env.JOB_NAME} [${env.BUILD_NUMBER}]"
         }
         failure {
             echo 'Pipeline failed!'
-            // mail to: 'team@example.com', subject: "FAILURE: Pipeline ${env.JOB_NAME} [${env.BUILD_NUMBER}]"
+            // mail to: '2023tm93621@wilp.bits-pilani.ac.in', subject: "FAILURE: Pipeline ${env.JOB_NAME} [${env.BUILD_NUMBER}]"
         }
         unstable {
             echo 'Pipeline unstable (e.g., tests failed but were caught).'
