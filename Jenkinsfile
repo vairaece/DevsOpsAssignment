@@ -22,7 +22,7 @@ pipeline {
                 sh 'mkdir -p build' 
 
              
-                sh './build.sh'
+                sh 'sudo ./build.sh'
 
                archiveArtifacts artifacts: 'build/app.txt', fingerprint: true
             }
@@ -48,7 +48,7 @@ pipeline {
                 echo "Starting Test Stage"
                 
                 catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-                    sh './test.sh'
+                    sh 'sudo ./test.sh'
                 }
                
             }
@@ -76,7 +76,7 @@ pipeline {
             steps {
                 echo "Starting Deploy Stage"
              
-                sh './deploy.sh PlaceholderEnvironment' 
+                sh 'sudo  ./deploy.sh PlaceholderEnvironment' 
             }
             post {
                 success {
