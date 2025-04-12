@@ -68,9 +68,28 @@ pipeline {
 
     } // End of stages
 
-    // ===== Post Actions (Run after all stages) =====
+       // ===== Post Actions (Run after all stages) =====
     post {
-        // ... post actions ...
-    } 
+        always {
+            echo 'Pipeline finished.'
+            // Clean up workspace maybe?
+            // cleanWs() // Note: cleanWs() might remove logs you want to inspect on failure
+        }
+        success {
+            echo 'Pipeline completed successfully!'
+            // mail to: 'team@example.com', subject: "SUCCESS: Pipeline ${env.JOB_NAME} [${env.BUILD_NUMBER}]"
+        }
+        failure {
+            echo 'Pipeline failed!'
+            // mail to: 'team@example.com', subject: "FAILURE: Pipeline ${env.JOB_NAME} [${env.BUILD_NUMBER}]"
+        }
+        unstable {
+            echo 'Pipeline unstable (e.g., tests failed but were caught).'
+        }
+        changed {
+             echo 'Pipeline status changed from previous run.'
+        }
+    } // End of post actions
 
 } // End of pipeline
+
