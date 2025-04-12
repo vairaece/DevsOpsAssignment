@@ -65,6 +65,7 @@ environment {
                 "PROD_DIR=${env.PROD_DIR}"
             ]
                  sh "echo '${envVars.join("\\n")}' > jenkins_env.sh"
+                 }
                  // Add execute permission for the deploy script too!
                  echo "Setting execute permission for deploy script for Staging..."
                  sh 'chmod +x deploy.sh'
@@ -92,6 +93,7 @@ environment {
                 "PROD_DIR=${env.PROD_DIR}"
             ]
                  sh "echo '${envVars.join("\\n")}' > jenkins_env.sh"
+                    }
                  // Add execute permission for the deploy script too!
                  echo "Setting execute permission for deploy script for Production..."
                  sh 'chmod +x deploy.sh'
