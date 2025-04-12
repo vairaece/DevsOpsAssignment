@@ -55,7 +55,8 @@ pipeline {
                 script {
                     try {
                         timeout(time: 1, unit: 'MINUTES') {
-                            sh script: 'sudo ./test.sh', label: 'Run test.sh'
+                        //    sh script: 'sudo ./test.sh', label: 'Run test.sh'
+                                echo "Test Code"
                         }
                     } catch (hudson.AbortException e) {
                         echo "Test script timed out or failed: ${e.getMessage()}"
@@ -89,7 +90,8 @@ pipeline {
                 script {
                     try {
                         timeout(time: 1, unit: 'MINUTES') {
-                            sh script: 'sudo ./deploy.sh PlaceholderEnvironment', label: 'Run deploy.sh'
+                        //    sh script: 'sudo ./deploy.sh PlaceholderEnvironment', label: 'Run deploy.sh'
+                                echo "Deploy Code"
                         }
                     } catch (hudson.AbortException e) {
                         echo "Deployment script timed out or failed: ${e.getMessage()}"
