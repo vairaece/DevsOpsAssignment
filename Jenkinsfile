@@ -54,32 +54,37 @@ environment {
         } // End of Test Stage
 
         // ===== 3. Deploy Stage (Staging) =====
-        stage('Deploy in Staging') {
-            // REMOVED the 'when' block - it's not needed here
-            steps {
-                echo "Starting Deploy Stage in Staging"
-                   // sh "mkdir -p ${env.STAGING_DIR}"
-                 script {
+  stage('Deploy in Staging') {
+    steps {
+        echo "Starting Deploy Stage in Staging"
+        // Create jenkins_env.sh file
+        script {
             def envVars = [
                 "STAGING_DIR=${env.STAGING_DIR}",
                 "PROD_DIR=${env.PROD_DIR}"
             ]
-                 sh "echo '${envVars.join("\\n")}' > jenkins_env.sh"
-                 }
-                 // Add execute permission for the deploy script too!
-                 echo "Setting execute permission for deploy script for Staging..."
-                 sh 'chmod +x deploy.sh'
-                 echo "Running deploy script for Staging..."
-                sh './deploy.sh  Staging ${env.STAGING_DIR}' 
-
-                 sh "cp build/app.txt ${env.STAGING_DIR}/"
-                    echo "Deployed artifact to ${env.STAGING_DIR}"
-            }
-            post {
-                success { echo 'Deployment successful in Staging!' }
-                failure { echo 'Deployment failed in Staging!' }
-            }
-        } // End of Deploy Stage to Staging
+            sh "echo '${envVars.join("\\n")}' > jenkins_env.sh"
+        }
+        // Add execute permission for the deploy script too!
+        echo "Setting execute permission for deploy script for Staging..."
+        sh 'chmod +x deploy.sh'
+        //Source the file
+        sh "source jenkins_env.sh"
+        //Create the directory
+        sh "mkdir -p ${STAGING_DIR}"
+        echo "Running deploy script for Staging..."
+        sh './deploy.sh  Staging' # Pass only the environment name
+        sh "cp build/app.txt ${STAGING_DIR}/"
+        echo "Deployed artifact to ${STAGING_DIR}"
+        // Clean up the jenkins_env.sh file
+        sh 'rm -f jenkins_env.sh'
+    }
+    post {
+        success { echo 'Deployment successful in Staging!' }
+        failure { echo 'Deployment failed in Staging!' }
+    }
+}
+// End of Deploy Stage to Staging
 
            // ===== 4. Deploy Stage (Production) =====
         stage('Deploy in Production') {
