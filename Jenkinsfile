@@ -2,10 +2,15 @@
 pipeline {
     agent { label 'macos' } 
 
-    environment {
-        DEPLOY_USER = 'deploy-user' 
-    }
+   // environment {
+ //       DEPLOY_USER = 'deploy-user' 
+  //  }
 
+environment {
+        STAGING_DIR = "/tmp/my-app-staging"
+        PROD_DIR = "/tmp/my-app-prod"
+    }
+    
     stages {
         // ===== 1. Build Stage =====
         stage('Build') {
@@ -17,8 +22,7 @@ pipeline {
                 sh 'chmod +x build.sh' 
                 echo "Running build script..."
                 sh './build.sh'
-                // Make sure build.sh actually creates 'build/app.txt'
-                // Or adjust the path/filename if needed
+                          
                 archiveArtifacts artifacts: 'build/app.txt', fingerprint: true 
             }
             post {
@@ -49,22 +53,46 @@ pipeline {
             }
         } // End of Test Stage
 
-        // ===== 3. Deploy Stage (Placeholder) =====
-        stage('Deploy') {
+        // ===== 3. Deploy Stage (Staging) =====
+        stage('Deploy in Staging') {
             // REMOVED the 'when' block - it's not needed here
             steps {
-                echo "Starting Deploy Stage"
+                echo "Starting Deploy Stage in Staging"
+                   sh "mkdir -p ${env.STAGING_DIR}"
                  // Add execute permission for the deploy script too!
-                 echo "Setting execute permission for deploy script..."
+                 echo "Setting execute permission for deploy script for Staging..."
                  sh 'chmod +x deploy.sh'
-                 echo "Running deploy script..."
-                sh './deploy.sh PlaceholderEnvironment' 
+                 echo "Running deploy script for Staging..."
+                sh './deploy.sh  Staging ${env.STAGING_DIR}' 
+
+                 sh "cp build/app.txt ${env.STAGING_DIR}/"
+                    echo "Deployed artifact to ${env.STAGING_DIR}"
             }
             post {
-                success { echo 'Deployment successful!' }
-                failure { echo 'Deployment failed!' }
+                success { echo 'Deployment successful in Staging!' }
+                failure { echo 'Deployment failed in Staging!' }
             }
-        } // End of Deploy Stage
+        } // End of Deploy Stage to Staging
+
+           // ===== 4. Deploy Stage (Production) =====
+        stage('Deploy in Production') {
+            // REMOVED the 'when' block - it's not needed here
+            steps {
+                echo "Starting Deploy Stage in Production"
+                 sh "mkdir -p ${env.PROD_DIR}"
+                 // Add execute permission for the deploy script too!
+                 echo "Setting execute permission for deploy script for Production..."
+                 sh 'chmod +x deploy.sh'
+                 echo "Running deploy script for Production..."
+                sh './deploy.sh Production ${env.PROD_DIR}' 
+                sh "cp build/app.txt ${env.PROD_DIR}/" 
+                    echo "Deployed artifact to ${env.PROD_DIR}"
+            }
+            post {
+                success { echo 'Deployment successful in Production!' }
+                failure { echo 'Deployment failed in Production!' }
+            }
+        } // End of Deploy Stage to Production
 
     } // End of stages
 
