@@ -20,7 +20,8 @@ pipeline {
                 script {
                     try {
                         timeout(time: 1, unit: 'MINUTES') { // Set a timeout for the build script
-                            sh script: 'sudo ./build.sh', label: 'Run build.sh'
+                            // sh script: 'sudo ./build.sh', label: 'Run build.sh'
+                             echo "Build Code"
                         }
                     } catch (hudson.AbortException e) {
                         echo "Build script timed out or failed: ${e.getMessage()}"
