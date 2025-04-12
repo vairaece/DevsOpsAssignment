@@ -24,12 +24,18 @@ pipeline {
                 // Create necessary directories
                 sh 'mkdir -p build' // Ensure build directory exists
 
-                // Execute the build script
+                // ***** FIX: Add execute permission *****
+                echo "Setting execute permission for build script..."
+                sh 'chmod +x build.sh' 
+
+                // Now execute the build script
+                echo "Running build script..."
                 sh './build.sh'
 
                 // Archive artifacts (files produced by the build)
                 // These can be downloaded later or used by downstream jobs/stages
-                archiveArtifacts artifacts: 'build/app.txt', fingerprint: true
+                // Make sure the path is correct based on what build.sh creates
+                archiveArtifacts artifacts: 'build/app.txt', fingerprint: true 
             }
             // Post-build actions for this stage
             post {
