@@ -1,43 +1,44 @@
+// Declarative Pipeline
 pipeline {
-
+    // Agent directive: Where should the pipeline run?
+    // 'any' means Jenkins can use any available agent (master or slave).
+    // We can specify labels to target specific slaves.
     agent { label 'macos' } // Run on any agent with the 'macos' label (our slave)
 
+    // Environment variables available to all stages
     environment {
-        DEPLOY_USER = 'deploy-user'
+        // Example: Could define paths or credentials here (use Jenkins credentials store for secrets!)
+        DEPLOY_USER = 'deploy-user' // Example user
     }
 
+    // Stages: Logical groupings of steps
     stages {
         // ===== 1. Build Stage =====
         stage('Build') {
             steps {
+                // Steps are the actual commands/actions
                 echo "Starting Build Stage on node: ${env.NODE_NAME}"
-
+                // Get the code from the Git repository
                 checkout scm
 
-                sh 'mkdir -p build'
+                // Create necessary directories
+                sh 'mkdir -p build' // Ensure build directory exists
 
-                // Modified: Added timeout and error handling
-                script {
-                    try {
-                        timeout(time: 1, unit: 'MINUTES') { // Set a timeout for the build script
-                            // sh script: 'sudo ./build.sh', label: 'Run build.sh'
-                             echo "Build Code"
-                        }
-                    } catch (hudson.AbortException e) {
-                        echo "Build script timed out or failed: ${e.getMessage()}"
-                        error("Build failed due to timeout or script error.") // Fail the build
-                    }
-                }
+                // Execute the build script
+                sh './build.sh'
 
+                // Archive artifacts (files produced by the build)
+                // These can be downloaded later or used by downstream jobs/stages
                 archiveArtifacts artifacts: 'build/app.txt', fingerprint: true
             }
-
+            // Post-build actions for this stage
             post {
                 success {
                     echo 'Build successful!'
                 }
                 failure {
                     echo 'Build failed!'
+                    // Could add notifications here (email, Slack, etc.)
                 }
             }
         } // End of Build Stage
@@ -46,58 +47,45 @@ pipeline {
         stage('Test') {
             // Only run tests if the build was successful
             when {
-                expression { success() }
+                expression { success() } // Check if previous stages were successful
             }
             steps {
                 echo "Starting Test Stage"
-
-                // Modified: Added timeout and error handling to test stage
-                script {
-                    try {
-                        timeout(time: 1, unit: 'MINUTES') {
-                        //    sh script: 'sudo ./test.sh', label: 'Run test.sh'
-                                echo "Test Code"
-                        }
-                    } catch (hudson.AbortException e) {
-                        echo "Test script timed out or failed: ${e.getMessage()}"
-                        currentBuild.result = 'UNSTABLE' // Mark build as unstable instead of failing completely
-                    }
+                // Execute the test script
+                // Use 'catchError' to handle failures gracefully
+                catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                    sh './test.sh'
                 }
+                // Example: Archive test results (if using a standard format like JUnit)
+                // junit 'path/to/test-results.xml'
             }
             post {
                 success {
                     echo 'Tests passed!'
                 }
                 unstable { // If catchError set buildResult to UNSTABLE
-                    echo 'Tests passed, but build marked as unstable.'
+                     echo 'Tests passed, but build marked as unstable.'
                 }
                 failure {
                     echo 'Tests failed!'
+                    // Notify developers
                 }
             }
         } // End of Test Stage
 
         // ===== 3. Deploy Stage (Placeholder) =====
+        // This stage is often more complex, involving copying files to servers,
+        // restarting services, interacting with cloud providers, etc.
         stage('Deploy') {
             // Only deploy if build and test were successful
-             when {
-                 expression { success() }
-             }
+            when {
+                expression { success() }
+            }
             steps {
                 echo "Starting Deploy Stage"
-
-                // Modified: Added timeout and error handling for deploy
-                script {
-                    try {
-                        timeout(time: 1, unit: 'MINUTES') {
-                        //    sh script: 'sudo ./deploy.sh PlaceholderEnvironment', label: 'Run deploy.sh'
-                                echo "Deploy Code"
-                        }
-                    } catch (hudson.AbortException e) {
-                        echo "Deployment script timed out or failed: ${e.getMessage()}"
-                        error("Deployment failed due to timeout or script error.")
-                    }
-                }
+                // This is where you'd put your actual deployment logic
+                // For now, we just run our placeholder script
+                sh './deploy.sh PlaceholderEnvironment' // Pass environment name
             }
             post {
                 success {
@@ -115,18 +103,22 @@ pipeline {
     post {
         always {
             echo 'Pipeline finished.'
+            // Clean up workspace maybe?
+            // cleanWs()
         }
         success {
             echo 'Pipeline completed successfully!'
+            // mail to: 'team@example.com', subject: "SUCCESS: Pipeline ${env.JOB_NAME} [${env.BUILD_NUMBER}]"
         }
         failure {
             echo 'Pipeline failed!'
+            // mail to: 'team@example.com', subject: "FAILURE: Pipeline ${env.JOB_NAME} [${env.BUILD_NUMBER}]"
         }
         unstable {
             echo 'Pipeline unstable (e.g., tests failed but were caught).'
         }
         changed {
-            echo 'Pipeline status changed from previous run.'
+             echo 'Pipeline status changed from previous run.'
         }
     } // End of post actions
 
