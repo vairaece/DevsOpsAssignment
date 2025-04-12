@@ -1,4 +1,5 @@
 #!/bin/bash
+source jenkins_env.sh  # Source the Jenkins environment
 echo "Deploying artifact build/app.txt to $1 environment..."
 if [ -n "$2" ]; then
   echo "Target directory: $2"

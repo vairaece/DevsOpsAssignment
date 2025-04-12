@@ -58,7 +58,13 @@ environment {
             // REMOVED the 'when' block - it's not needed here
             steps {
                 echo "Starting Deploy Stage in Staging"
-                   sh "mkdir -p ${env.STAGING_DIR}"
+                   // sh "mkdir -p ${env.STAGING_DIR}"
+                 script {
+            def envVars = [
+                "STAGING_DIR=${env.STAGING_DIR}",
+                "PROD_DIR=${env.PROD_DIR}"
+            ]
+                 sh "echo '${envVars.join("\\n")}' > jenkins_env.sh"
                  // Add execute permission for the deploy script too!
                  echo "Setting execute permission for deploy script for Staging..."
                  sh 'chmod +x deploy.sh'
@@ -79,7 +85,13 @@ environment {
             // REMOVED the 'when' block - it's not needed here
             steps {
                 echo "Starting Deploy Stage in Production"
-                 sh "mkdir -p ${env.PROD_DIR}"
+                 //sh "mkdir -p ${env.PROD_DIR}"
+                    script {
+            def envVars = [
+                "STAGING_DIR=${env.STAGING_DIR}",
+                "PROD_DIR=${env.PROD_DIR}"
+            ]
+                 sh "echo '${envVars.join("\\n")}' > jenkins_env.sh"
                  // Add execute permission for the deploy script too!
                  echo "Setting execute permission for deploy script for Production..."
                  sh 'chmod +x deploy.sh'
